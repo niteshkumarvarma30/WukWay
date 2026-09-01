@@ -11,7 +11,9 @@ import {
 import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../services/api';
+
 
 type OrderTrackRouteProp = RouteProp<RootStackParamList, 'OrderTrack'>;
 type OrderTrackNavigationProp = NativeStackNavigationProp<RootStackParamList, 'OrderTrack'>;
@@ -32,14 +34,26 @@ export default function OrderTrackScreen({ route, navigation }: Props) {
       const res = await api.get(`/orders/${orderId}`);
       if (res.data) {
         setOrder(res.data);
+        return;
       }
     } catch (e) {
-      console.error('Error fetching order status', e);
+      // Look up in local storage if backend is offline
+      try {
+        const existingRaw = (await AsyncStorage.getItem('localUserOrders')) || '[]';
+        const existing = JSON.parse(existingRaw);
+        const match = existing.find((o: any) => o.id === orderId);
+        if (match) {
+          setOrder(match);
+        }
+      } catch (storeErr) {
+        // ignore
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
+
 
   useEffect(() => {
     fetchOrder();

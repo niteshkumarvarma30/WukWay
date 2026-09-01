@@ -152,11 +152,24 @@ export default function VendorHomeScreen() {
       setOutlet(res.data);
       await AsyncStorage.removeItem('activeVendorStallId');
     } catch (e) {
-      alert('Failed to submit stall application.');
+      console.warn('Backend offline, using client fallback for stall registration');
+      const fallbackOutlet = {
+        id: `out-${Date.now()}`,
+        name: stallName,
+        cityZone: stallZone,
+        cuisine: cuisine || 'Quick Bites & Street Food',
+        ownerId: dbUserId || 'vendor_demo',
+        isApproved: false,
+        status: 'CLOSED',
+        menuItems: [],
+      };
+      setOutlet(fallbackOutlet);
+      await AsyncStorage.setItem('pendingCustomStall', JSON.stringify(fallbackOutlet));
     } finally {
       setSubmitting(false);
     }
   };
+
 
   const handleLaunchDemoStall = async (stallId: string) => {
     setLoading(true);
