@@ -175,6 +175,22 @@ export default function VendorHomeScreen() {
     setLoading(true);
     try {
       await AsyncStorage.setItem('activeVendorStallId', stallId);
+      
+      const localRaw = await AsyncStorage.getItem('localUserOrders');
+      const localOrders = localRaw ? JSON.parse(localRaw) : [];
+      const mappedLocal = localOrders.map((o: any) => ({
+        id: o.id,
+        orderId: (o.id || '4821').substring(0, 5).toUpperCase(),
+        customerName: o.customerName || 'WukWay Customer',
+        eta: `${o.declaredEtaMinutes || 5} min`,
+        status: o.status || 'ACCEPTED',
+        pickupToken: o.pickupToken || `#WW-${(o.id || '4821').substring(0, 4).toUpperCase()}`,
+        items: (o.items || []).map((i: any) => ({
+          qty: i.quantity || 1,
+          name: i.name || 'Dish',
+        })),
+      }));
+
       const allOutlets = await api.get('/outlets');
       const found = (allOutlets.data || []).find((o: any) => o.id === stallId);
       if (found) {
@@ -193,7 +209,9 @@ export default function VendorHomeScreen() {
             name: i.menuItem?.name || i.name || 'Dish',
           })),
         }));
-        setOrders(mappedOrders);
+        setOrders([...mappedLocal, ...mappedOrders]);
+      } else {
+        throw new Error('Fallback needed');
       }
     } catch (e) {
       console.warn('Launch demo stall fallback for offline mode', e);
@@ -214,7 +232,23 @@ export default function VendorHomeScreen() {
       };
       setOutlet(demoOutlet);
       setIsOpen(true);
-      setOrders([
+
+      const localRaw = await AsyncStorage.getItem('localUserOrders');
+      const localOrders = localRaw ? JSON.parse(localRaw) : [];
+      const mappedLocal = localOrders.map((o: any) => ({
+        id: o.id,
+        orderId: (o.id || '4821').substring(0, 5).toUpperCase(),
+        customerName: o.customerName || 'WukWay Customer',
+        eta: `${o.declaredEtaMinutes || 5} min`,
+        status: o.status || 'ACCEPTED',
+        pickupToken: o.pickupToken || `#WW-${(o.id || '4821').substring(0, 4).toUpperCase()}`,
+        items: (o.items || []).map((i: any) => ({
+          qty: i.quantity || 1,
+          name: i.name || 'Dish',
+        })),
+      }));
+
+      const defaultDemo = [
         {
           id: 'ord-101',
           orderId: '4821',
@@ -233,9 +267,10 @@ export default function VendorHomeScreen() {
           pickupToken: '#WW-9120',
           items: [{ qty: 1, name: 'Kurkure Paneer Momos (6 pcs)', price: '120.00' }],
         },
-      ]);
-    } finally {
+      ];
 
+      setOrders([...mappedLocal, ...defaultDemo]);
+    } finally {
       setLoading(false);
     }
   };
@@ -253,15 +288,25 @@ export default function VendorHomeScreen() {
   const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
       await api.patch(`/orders/${orderId}/status`, { status: newStatus });
-      setOrders((prev) =>
-        prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)),
-      );
-      if (dbUserId) fetchVendorData(dbUserId, outlet?.id);
     } catch (e) {
-      console.error('Failed to update status', e);
-      alert('Failed to update status.');
+      console.warn('API update failed, updating locally');
+    }
+    setOrders((prev) =>
+      prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)),
+    );
+    // Also update localUserOrders in AsyncStorage so customer phone updates live
+    try {
+      const localRaw = await AsyncStorage.getItem('localUserOrders');
+      if (localRaw) {
+        const local = JSON.parse(localRaw);
+        const updated = local.map((o: any) => (o.id === orderId ? { ...o, status: newStatus } : o));
+        await AsyncStorage.setItem('localUserOrders', JSON.stringify(updated));
+      }
+    } catch (e) {
+      // ignore
     }
   };
+
 
   if (loading) {
     return (
