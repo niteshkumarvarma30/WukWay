@@ -196,8 +196,46 @@ export default function VendorHomeScreen() {
         setOrders(mappedOrders);
       }
     } catch (e) {
-      console.warn('Launch demo stall error', e);
+      console.warn('Launch demo stall fallback for offline mode', e);
+      const demoOutlet = {
+        id: stallId,
+        name: 'Momo House',
+        cityZone: 'Academic Block B - East Courtyard',
+        cuisine: 'Steamed & Fried Dumplings, Thukpa',
+        ownerId: 'demo-vendor-1',
+        isApproved: true,
+        status: 'OPEN',
+        menuItems: [
+          { id: 'm1', name: 'Steamed Veg Momos (6 pcs)', price: '80.00', isAvailable: true },
+          { id: 'm2', name: 'Kurkure Paneer Momos (6 pcs)', price: '120.00', isAvailable: true },
+          { id: 'm3', name: 'Darjeeling Chicken Momos (6 pcs)', price: '110.00', isAvailable: true },
+          { id: 'm4', name: 'Spicy Schezwan Gravy Momos', price: '130.00', isAvailable: true },
+        ],
+      };
+      setOutlet(demoOutlet);
+      setIsOpen(true);
+      setOrders([
+        {
+          id: 'ord-101',
+          orderId: '4821',
+          customerName: 'Aarav Sharma',
+          eta: '5 min',
+          status: 'ACCEPTED',
+          pickupToken: '#WW-4821',
+          items: [{ qty: 2, name: 'Steamed Veg Momos (6 pcs)', price: '80.00' }],
+        },
+        {
+          id: 'ord-102',
+          orderId: '9120',
+          customerName: 'Priya Patel',
+          eta: '10 min',
+          status: 'PREPARING',
+          pickupToken: '#WW-9120',
+          items: [{ qty: 1, name: 'Kurkure Paneer Momos (6 pcs)', price: '120.00' }],
+        },
+      ]);
     } finally {
+
       setLoading(false);
     }
   };
