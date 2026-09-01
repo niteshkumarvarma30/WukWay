@@ -52,31 +52,130 @@ export default function CustomerHomeScreen({ navigation }: CustomerHomeProps) {
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
+  const DEFAULT_CAMPUS_OUTLETS = [
+    {
+      id: 'out-1',
+      name: 'Momo House',
+      cityZone: 'Academic Block B - East Courtyard',
+      cuisine: 'Steamed & Fried Dumplings, Thukpa',
+      distance: '150m · 2 min walk',
+      rating: 4.8,
+      reviewCount: 342,
+      status: 'OPEN',
+      isApproved: true,
+      usp: '⚡ Piping hot in 4 mins',
+      priceRange: '₹80 for one',
+      menuItems: [
+        { id: 'm1', name: 'Steamed Veg Momos (6 pcs)', price: '80.00', isAvailable: true },
+        { id: 'm2', name: 'Kurkure Paneer Momos (6 pcs)', price: '120.00', isAvailable: true },
+        { id: 'm3', name: 'Darjeeling Chicken Momos (6 pcs)', price: '110.00', isAvailable: true },
+        { id: 'm4', name: 'Spicy Schezwan Gravy Momos', price: '130.00', isAvailable: true },
+      ],
+    },
+    {
+      id: 'out-4',
+      name: 'NK Varma Food Stall',
+      cityZone: 'Science Court Book Cafe',
+      cuisine: 'Biriyani, Momos & Rolls',
+      distance: '200m · 3 min walk',
+      rating: 4.9,
+      reviewCount: 89,
+      status: 'OPEN',
+      isApproved: true,
+      usp: '👑 Chef Special Dum Biryani',
+      priceRange: '₹140 for one',
+      menuItems: [
+        { id: 'm-nk-1', name: 'Hyderabadi Chicken Biryani', price: '180.00', isAvailable: true },
+        { id: 'm-nk-2', name: 'Veg Dum Biryani', price: '140.00', isAvailable: true },
+        { id: 'm-nk-3', name: 'Steamed Chicken Momos (6 pcs)', price: '100.00', isAvailable: true },
+      ],
+    },
+    {
+      id: 'out-2',
+      name: 'Rolls & Bowls',
+      cityZone: 'Library Junction - Food Street',
+      cuisine: 'Kolkata Kathi Rolls, Rice Bowls',
+      distance: '300m · 4 min walk',
+      rating: 4.9,
+      reviewCount: 512,
+      status: 'OPEN',
+      isApproved: true,
+      usp: '🔥 ₹99 Combo Meals',
+      priceRange: '₹90 for one',
+      menuItems: [
+        { id: 'm5', name: 'Double Egg Chicken Roll', price: '90.00', isAvailable: true },
+        { id: 'm6', name: 'Paneer Tikka Roll', price: '100.00', isAvailable: true },
+        { id: 'm7', name: 'Crispy Veg Roll', price: '70.00', isAvailable: true },
+        { id: 'm8', name: 'Butter Chicken Rice Bowl', price: '140.00', isAvailable: true },
+      ],
+    },
+    {
+      id: 'out-3',
+      name: 'Southern Sambar & Dosas',
+      cityZone: 'Hostel 4 Cafeteria Lane',
+      cuisine: 'Ghee Podi Roast, Filter Coffee',
+      distance: '450m · 6 min walk',
+      rating: 4.7,
+      reviewCount: 280,
+      status: 'OPEN',
+      isApproved: true,
+      usp: '☕ ₹25 Degree Filter Coffee',
+      priceRange: '₹75 for one',
+      menuItems: [
+        { id: 'm9', name: 'Ghee Podi Masala Dosa', price: '75.00', isAvailable: true },
+        { id: 'm10', name: 'Steamed Idli Vada Combo', price: '60.00', isAvailable: true },
+        { id: 'm11', name: 'Degree Filter Coffee', price: '25.00', isAvailable: true },
+      ],
+    },
+  ];
+
   const fetchCustomerOrders = async (userId: string) => {
     try {
       const res = await api.get(`/orders/customer/${userId}`);
       const orders = res.data || [];
-      setOrderHistory(orders);
-
-      const active = orders.find((o: any) =>
-        ['PENDING', 'ACCEPTED', 'PREPARING', 'READY'].includes(o.status),
-      );
-      setActiveOrder(active || null);
+      if (orders.length > 0) {
+        setOrderHistory(orders);
+        const active = orders.find((o: any) =>
+          ['PENDING', 'ACCEPTED', 'PREPARING', 'READY'].includes(o.status),
+        );
+        setActiveOrder(active || null);
+        return;
+      }
     } catch (e) {
       console.warn('Error fetching customer orders', e);
+    }
+    // Also load local stored orders
+    try {
+      const localRaw = (await AsyncStorage.getItem('localUserOrders')) || '[]';
+      const local = JSON.parse(localRaw);
+      if (local.length > 0) {
+        setOrderHistory(local);
+        const active = local.find((o: any) =>
+          ['PENDING', 'ACCEPTED', 'PREPARING', 'READY'].includes(o.status),
+        );
+        setActiveOrder(active || null);
+      }
+    } catch (e) {
+      // ignore
     }
   };
 
   const fetchOutlets = async () => {
     try {
       const res = await api.get('/outlets');
-      setOutlets(res.data || []);
+      if (res.data && res.data.length > 0) {
+        setOutlets(res.data);
+      } else {
+        setOutlets(DEFAULT_CAMPUS_OUTLETS);
+      }
     } catch (error) {
-      console.error('Error fetching outlets', error);
+      console.warn('Using campus stall defaults', error);
+      setOutlets(DEFAULT_CAMPUS_OUTLETS);
     } finally {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     const init = async () => {
