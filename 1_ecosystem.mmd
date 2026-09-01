@@ -1,0 +1,37 @@
+flowchart TD
+    subgraph Apps["Client Applications"]
+        CA["Customer App<br/>React Native - Android"]
+        VA["Vendor App<br/>React Native / Web - Tablet"]
+        AP["Admin Panel<br/>React.js - Web Dashboard"]
+    end
+
+    subgraph Backend["Backend Platform - AWS"]
+        API["REST / WebSocket API<br/>Node.js (NestJS)"]
+        DB[("PostgreSQL - RDS")]
+        CACHE[("Redis - ElastiCache")]
+        Q["Order Event Queue<br/>SQS / SNS"]
+    end
+
+    subgraph ThirdParty["Third-Party Services"]
+        MAPS["Google Maps / Places API"]
+        PAY["Razorpay - UPI Payments"]
+        FCM["Firebase Cloud Messaging"]
+        OTP["SMS / OTP Gateway"]
+        S3[("S3 - Images & Assets")]
+    end
+
+    CA -- "Browse, Order, Track" --> API
+    VA -- "Accept, Prepare, Update Status" --> API
+    AP -- "Onboard, Configure, Monitor" --> API
+
+    API --> DB
+    API --> CACHE
+    API --> Q
+    Q -- "Order status events" --> CA
+    Q -- "New order alerts" --> VA
+
+    API --> MAPS
+    API --> PAY
+    API --> FCM
+    API --> OTP
+    API --> S3

@@ -1,0 +1,33 @@
+flowchart LR
+    subgraph P1["Phase 1 - Discover"]
+        direction TB
+        A["Open App<br/>Location Detected"] --> B["Home / The Lane<br/>outlets by walking time"]
+        B --> C{"Find food via"}
+        C -->|Search| D["Search dish,<br/>craving or price"]
+        C -->|Feed| E["Trending &<br/>local specials"]
+        C -->|Scan| F["Nearby outlet<br/>discovery"]
+        C -->|Filters| G["Craving filters -<br/>Spicy, Under 100"]
+    end
+
+    subgraph P2["Phase 2 - Order"]
+        direction TB
+        H["Select Outlet"] --> I["Full Menu +<br/>Quick Choices"]
+        I --> J["Add Items -<br/>One-Tap + Qty"]
+        J --> K["Pickup Cart /<br/>Ticket"]
+        K --> L["Declare ETA -<br/>5 / 10 / 15 min"]
+        L --> M["Confirm Order"]
+    end
+
+    subgraph P3["Phase 3 - Pickup"]
+        direction TB
+        N["Order Placed"] --> O["Preparing"]
+        O --> P["Ready for<br/>Pickup"]
+        P --> Q["Pickup Token<br/>Issued"]
+        Q --> R["Customer<br/>Collects"]
+    end
+
+    D --> H
+    E --> H
+    F --> H
+    G --> H
+    M --> N

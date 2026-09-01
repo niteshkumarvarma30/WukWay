@@ -1,0 +1,22 @@
+flowchart LR
+    subgraph C1["Customer places order"]
+        direction TB
+        A(["Cart"]) --> B["ETA Declared<br/>5 / 10 / 15 min"]
+        B --> C["Placed<br/>payment captured"]
+    end
+
+    subgraph C2["Vendor fulfills order"]
+        direction TB
+        D["Accepted<br/>by Vendor"] --> E["Preparing"]
+        E --> F["Ready"]
+        F --> G["Token Issued"]
+        G --> H(["Collected"])
+    end
+
+    subgraph C3["If vendor can't fulfill"]
+        direction TB
+        I["Rejected"] --> J(["Refunded"])
+    end
+
+    C -->|"Vendor accepts"| D
+    C -->|"Vendor rejects /<br/>outlet closed"| I

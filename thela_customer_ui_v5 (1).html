@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thela V5 — Quick Choice Pickup UX</title>
+<style>
+:root{--red:#E13328;--yellow:#FFC22E;--cream:#FFFBF2;--ink:#2B1710;--muted:#806c61;--paper:#fffdf8;--line:#eadfd2;--brown:#321a12;--green:#4c8755}
+*{box-sizing:border-box}body{margin:0;background:#e7dfd5;color:var(--ink);font-family:Inter,system-ui,sans-serif}button,input{font:inherit}button{cursor:pointer}
+.app{max-width:520px;margin:auto;min-height:100vh;background:var(--cream);padding-bottom:82px;box-shadow:0 0 50px #2b171015}
+.top{height:70px;padding:0 22px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:30;background:#fffbf2f2;backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.logo{font-size:28px;font-weight:1000;letter-spacing:-1.8px;color:var(--red)}.open{font-size:11px;color:var(--muted);font-weight:900}.open i{display:inline-block;width:7px;height:7px;background:#72ad77;border-radius:50%;margin-right:5px}
+.screen{display:none}.screen.active{display:block}.pad{padding:18px 22px}.eyebrow{font-size:10px;font-weight:1000;letter-spacing:1.1px;text-transform:uppercase}.muted{color:var(--muted)}
+.location{font-size:12px;font-weight:850;margin-bottom:10px}
+.hero{margin:0 22px;background:var(--red);color:#fff;border-radius:20px 20px 0 0;padding:19px 19px 30px;position:relative}.hero:after{content:"";position:absolute;bottom:-1px;left:0;right:0;height:15px;background:var(--cream);clip-path:polygon(0 100%,0 20%,4% 20%,5% 100%,9% 100%,10% 20%,14% 20%,15% 100%,19% 100%,20% 20%,24% 20%,25% 100%,29% 100%,30% 20%,34% 20%,35% 100%,39% 100%,40% 20%,44% 20%,45% 100%,49% 100%,50% 20%,54% 20%,55% 100%,59% 100%,60% 20%,64% 20%,65% 100%,69% 100%,70% 20%,74% 20%,75% 100%,79% 100%,80% 20%,84% 20%,85% 100%,89% 100%,90% 20%,94% 20%,95% 100%,100% 100%)}.hero h1{font-size:29px;line-height:1.02;letter-spacing:-1.5px;margin:8px 0}.hero h1 span{color:var(--yellow)}
+.search{margin:14px 22px 0;height:55px;background:#fff;border:1.5px solid var(--line);border-radius:16px;display:flex;align-items:center;padding:0 13px;gap:9px}.search input{border:0;outline:0;background:transparent;width:100%;font-size:13px;font-weight:750}.search input::placeholder{color:var(--muted)}.suggest{font-size:10px;font-weight:800;color:var(--muted);padding:6px 25px;min-height:22px}
+.chips{display:flex;gap:8px;overflow:auto;padding:8px 22px}.chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:9px 13px;font-size:11px;font-weight:900;white-space:nowrap}.chip.active{background:var(--brown);color:#fff;border-color:var(--brown)}
+.section{padding:0 22px;margin-top:18px}.head{display:flex;justify-content:space-between;align-items:end;margin-bottom:10px}.head h2{font-size:16px;margin:0;text-transform:uppercase;color:#80675b}.head span{font-size:9px;color:var(--muted);font-weight:850}
+.lane{position:relative;padding-left:28px}.lane:before{content:"";position:absolute;left:8px;top:12px;bottom:14px;border-left:2px dashed #e4cdbc}
+.vendor-card{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:17px;padding:12px;margin-bottom:11px;display:grid;grid-template-columns:1fr 68px;gap:9px}.vendor-card:before{content:"";position:absolute;left:-25px;top:18px;width:9px;height:9px;border-radius:50%;background:var(--red);box-shadow:0 0 0 4px var(--cream)}.walk{position:absolute;left:-27px;top:31px;color:var(--red);font-size:8px;font-weight:1000}.thumb{width:68px;height:68px;border-radius:13px;background-size:cover;background-position:center}.vendor-name{font-size:15px;font-weight:1000}.vendor-sub{font-size:11px;color:var(--muted);margin-top:3px}.vendor-price{font-size:15px;font-weight:1000;margin-top:5px}.old{text-decoration:line-through;color:#9a8880;font-size:10px;margin-right:5px}.tag{display:inline-block;background:var(--yellow);padding:4px 7px;border-radius:6px;font-size:8px;font-weight:1000}.activity{grid-column:1/-1;background:var(--brown);color:var(--yellow);padding:9px 10px;border-radius:10px;font-size:9px;font-weight:950}
+.primary{border:0;background:var(--red);color:#fff;border-radius:12px;padding:11px;width:100%;font-weight:1000}.secondary{border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px;font-size:10px;font-weight:950}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);background:#fffbf2f5;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:30;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}.bottom button{border:0;background:transparent;color:#725e55;font-size:9px;font-weight:900;padding:6px}.bottom button.active{color:var(--red)}
+/* vendor */
+.cover{height:185px;background-size:cover;background-position:center;position:relative}.back{position:absolute;top:15px;left:15px;border:0;background:#2b1710aa;color:#fff;width:36px;height:36px;border-radius:50%;font-size:20px}.cover-label{position:absolute;left:18px;bottom:14px;color:#fff}.cover-label h1{font-size:31px;letter-spacing:-1.5px;margin:3px 0}.cover-label small{color:#f6e8de;font-weight:750}
+.vendor-info{padding:13px 22px}.usp{background:var(--yellow);border-radius:12px;padding:10px;font-size:11px;font-weight:900}.vendor-meta{display:flex;gap:11px;color:var(--muted);font-size:9px;font-weight:850;margin-top:9px}
+.quick-title{padding:4px 22px 8px;font-size:16px;font-weight:1000;letter-spacing:-.5px}.quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding:0 22px}.quick{border:1px solid var(--line);background:var(--paper);border-radius:15px;padding:13px;text-align:left;min-height:82px}.quick b{display:block;font-size:12px}.quick span{display:block;color:var(--muted);font-size:9px;margin-top:4px}.quick strong{display:block;color:var(--red);font-size:12px;margin-top:7px}
+.build{margin:15px 22px;background:var(--brown);color:#fff;border-radius:18px;padding:15px}.build-top{display:flex;justify-content:space-between;align-items:center}.build b{font-size:13px}.build p{font-size:9px;color:#ddc9bf;margin:5px 0 11px}.build button{border:0;background:var(--yellow);color:var(--ink);border-radius:10px;padding:9px 11px;font-size:10px;font-weight:1000}
+.section-tabs{display:flex;gap:15px;overflow:auto;padding:9px 22px 4px;border-bottom:1px solid var(--line);position:sticky;top:70px;background:var(--cream);z-index:10}.section-tabs button{border:0;background:transparent;color:var(--muted);font-size:10px;font-weight:1000;padding:7px 0;white-space:nowrap}.section-tabs button.active{color:var(--red);border-bottom:2px solid var(--red)}
+.item{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:9px;display:grid;grid-template-columns:1fr 70px;gap:9px}.item h3{font-size:13px;margin:0}.item p{font-size:9px;color:var(--muted);margin:4px 0}.item-price{font-size:14px;font-weight:1000}.item-img{width:70px;height:70px;border-radius:12px;background-size:cover;background-position:center}.add{margin-top:7px;border:1px solid var(--red);color:var(--red);background:#fff;border-radius:9px;padding:6px 10px;font-size:9px;font-weight:1000}
+.cartbar{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);width:min(476px,calc(100% - 32px));background:var(--red);color:#fff;border-radius:15px;padding:11px 14px;display:none;justify-content:space-between;align-items:center;z-index:25;box-shadow:0 8px 24px #2b171033}.cartbar.show{display:flex}.cartbar button{border:0;background:var(--yellow);color:var(--ink);border-radius:9px;padding:8px 11px;font-size:10px;font-weight:1000}
+/* radar/feed/cart */
+.radar{margin:0 22px;height:370px;border:1px solid var(--line);border-radius:20px;background:radial-gradient(circle at 50% 50%,#fff7dd 0 8%,transparent 8.5%),radial-gradient(circle at 50% 50%,transparent 0 21%,#f2e1d6 21.5% 22%,transparent 22.5%),radial-gradient(circle at 50% 50%,transparent 0 39%,#f2e1d6 39.5% 40%,transparent 40.5%),radial-gradient(circle at 50% 50%,transparent 0 58%,#f2e1d6 58.5% 59%,transparent 59.5%),#fffdf8;position:relative}.me{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:var(--yellow);display:grid;place-items:center}.pin{position:absolute;width:18px;height:18px;border-radius:50%;background:var(--yellow);border:3px solid white}.pin.red{background:var(--red)}
+.feed-card{margin:0 22px;min-height:490px;border-radius:22px;background:linear-gradient(0deg,#2b1710ed,#2b171012),url('https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=900&q=80') center/cover;color:#fff;display:flex;align-items:flex-end;padding:22px}.feed-card h2{font-size:35px;line-height:1;letter-spacing:-1.5px;margin:6px 0}.feed-card p{font-size:12px;color:#eadbd2;line-height:1.45}
+.empty{text-align:center;padding:80px 24px}.empty-icon{width:125px;height:85px;background:#fae1dd;color:var(--red);display:grid;place-items:center;border-radius:18px;margin:auto;font-size:32px}
+/* eta/status */
+.eta-card{margin:22px;background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:20px}.eta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}.eta-btn{border:2px solid var(--line);background:var(--paper);border-radius:14px;padding:14px 7px;font-weight:1000;font-size:11px}.eta-btn b{display:block;font-size:22px}.eta-btn.selected{border-color:var(--red);background:#fff0ed}.token{margin-top:15px;background:var(--yellow);border-radius:16px;padding:16px;display:flex;justify-content:space-between;align-items:center}.token b{font-size:38px;letter-spacing:4px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,10px);opacity:0;background:var(--ink);color:#fff;padding:12px 15px;border-radius:12px;font-size:11px;font-weight:900;z-index:50;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div class="logo">thela</div><div class="open"><i></i> 12 stalls open</div></header>
+
+<section id="home" class="screen active">
+ <div class="pad location">📍 Patia, near KIIT · walking distance</div>
+ <div class="hero"><div class="eyebrow">SKIP LANE · ZERO WAITING</div><h1>Order ahead.<br>Eat it <span>hot.</span></h1></div>
+ <div class="search"><span style="font-size:21px;color:var(--muted)">⌕</span><input id="search" placeholder="Search food, craving or stall…"></div>
+ <div class="suggest" id="suggest">100 people nearby looking for something spicy?</div>
+ <div class="chips"><button class="chip active" onclick="chip(this,'all')">All</button><button class="chip" onclick="chip(this,'under')">Under ₹100</button><button class="chip" onclick="chip(this,'spicy')">Spicy</button><button class="chip" onclick="chip(this,'trending')">Trending</button></div>
+ <div class="section"><div class="head"><h2>The lane · closest first</h2><span>WALKING TIME</span></div><div class="lane" id="lane"></div></div>
+</section>
+
+<section id="vendor" class="screen">
+ <div class="cover" id="vendorCover"><button class="back" onclick="show('home')">‹</button><div class="cover-label"><div class="eyebrow">LOCAL FAVOURITE</div><h1 id="vName">Momo House</h1><small id="vType">Street food · 2 min walk</small></div></div>
+ <div class="vendor-info"><div class="usp" id="vUsp"></div><div class="vendor-meta"><span id="vWalk">🚶 2 min</span><span>● Open now</span><span>Pickup only</span></div></div>
+
+ <div class="quick-title">What are you after?</div>
+ <div class="quick-grid">
+   <button class="quick" onclick="quickPick('hungry')"><b>😋 I'm hungry</b><span>Best value + filling</span><strong>Build a meal →</strong></button>
+   <button class="quick" onclick="quickPick('quick')"><b>⚡ Just a quick bite</b><span>Fastest picks here</span><strong>Show quick →</strong></button>
+   <button class="quick" onclick="quickPick('under')"><b>💸 Under ₹100</b><span>Keep it cheap</span><strong>Show picks →</strong></button>
+   <button class="quick" onclick="quickPick('share')"><b>👥 For 2 people</b><span>Best sharing combos</span><strong>Show combos →</strong></button>
+ </div>
+
+ <div class="build"><div class="build-top"><b>🎟 Build my pickup</b><span style="font-size:9px;color:#d9c4ba">1-tap choices</span></div><p>Tell us what you want, not which menu category you want to browse.</p><button onclick="quickPick('hungry')">Make me a good ticket →</button></div>
+
+ <div class="section-tabs"><button class="active">Bestsellers</button><button>All menu</button><button>Combos</button><button>Drinks</button></div>
+ <div class="section"><div class="head"><h2 id="menuHeading">Bestsellers</h2><span>ADD IN ONE TAP</span></div><div id="bestItems"></div></div>
+ <div class="section"><div class="head"><h2>More from this stall</h2><span id="moreCount"></span></div><div id="moreItems"></div></div>
+</section>
+
+<section id="eta" class="screen"><div class="pad"><div class="eyebrow">TIMED COOKING</div><h2 style="font-size:31px;letter-spacing:-1.5px">When will you reach?</h2><p style="font-size:13px;line-height:1.5;color:var(--muted)">Rough is perfect. We time the cooking to your walk.</p></div><div class="eta-card"><b style="font-size:11px">YOUR PICKUP TICKET</b><div id="etaSummary" style="font-size:13px;margin-top:8px"></div><div class="eta-grid"><button class="eta-btn" data-eta="5">~5<b>min</b></button><button class="eta-btn selected" data-eta="10">~10<b>min</b></button><button class="eta-btn" data-eta="15">~15<b>min</b></button></div><p style="font-size:10px;color:var(--muted)">The stall sees your order now and gets a countdown for when to start cooking.</p><button class="primary" onclick="placeOrder()">Place pickup · <span id="etaTotal">₹0</span></button></div></section>
+
+<section id="status" class="screen"><div class="pad"><div class="eyebrow">YOUR PICKUP</div><h2 style="font-size:31px">Order status</h2><p id="statusSub" style="font-size:13px;color:var(--muted)"></p><div id="statusBox"></div></div></section>
+
+<section id="scan" class="screen">
+ <div class="pad"><div class="eyebrow">WHAT'S AROUND YOU</div><h2 style="font-size:31px">Pickup Scan</h2><p style="font-size:13px;color:var(--muted)">A live view of stalls you can actually reach on foot.</p></div>
+ <div class="radar"><div class="me">▲</div><i class="pin" style="left:70%;top:18%"></i><i class="pin" style="left:20%;top:30%"></i><i class="pin" style="left:60%;top:52%"></i><i class="pin" style="left:32%;top:67%"></i><i class="pin red" style="left:75%;top:78%"></i></div>
+ <div class="section"><div class="head"><h2>Closest open stalls</h2><span>TAP TO OPEN MENU</span></div><div id="scanList"></div></div>
+</section>
+
+<section id="feed" class="screen"><div class="pad"><div class="eyebrow">LOCAL FOOD, RIGHT NOW</div><h2 style="font-size:31px">Flavor Feed</h2><p style="font-size:13px;color:var(--muted)">Specials, drops and dishes people are actually picking up.</p></div><div class="feed-card"><div><div class="eyebrow" style="color:var(--yellow)">TODAY'S SPECIAL</div><h2>Truffle Butter Chicken</h2><p>Hot local special · 14 min prep · pickup price ₹320</p><button class="primary" style="width:auto" onclick="toast('Feed item can open its stall menu directly.')">View pickup →</button></div></div></section>
+
+<section id="cart" class="screen"><div class="empty"><div class="empty-icon">🎟</div><h2>Your pickup ticket is empty</h2><p style="font-size:13px;color:var(--muted)">Pick food from a nearby stall. Then tell us roughly how far you are.</p><button class="primary" onclick="show('home')">Browse The Lane</button></div></section>
+
+<nav class="bottom"><button class="active" onclick="show('home')">⌂<br>HOME</button><button onclick="show('scan')">◎<br>SCAN</button><button onclick="show('feed')">♨<br>FEED</button><button onclick="show('cart')">🎟<br>CART</button></nav>
+<div id="cartbar" class="cartbar"><div><b id="cartCount">0 items</b><br><small id="cartValue">₹0</small></div><button onclick="show('eta')">View ticket →</button></div>
+<div id="toast" class="toast"></div>
+</div>
+
+<script>
+const vendors=[
+{id:1,name:"Momo House",type:"Street food",walk:2,usp:"Famous for chicken momos · pickup deal ₹99",img:"https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?auto=format&fit=crop&w=900&q=80",items:[["Chicken momos",99,"6 pcs · spicy chutney","https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?auto=format&fit=crop&w=300&q=80"],["Fried momos",109,"8 pcs · crispy","https://images.unsplash.com/photo-1496116218417-1a781b1c416c?auto=format&fit=crop&w=300&q=80"],["Paneer momos",89,"6 pcs · veg","https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=300&q=80"],["Chilli chicken",149,"street-style dry","https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=300&q=80"]]},
+{id:2,name:"Roll Corner",type:"QSR",walk:4,usp:"Double-egg chicken seekh roll · pickup ₹95",img:"https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=900&q=80",items:[["Chicken seekh roll",95,"double egg · onion","https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=300&q=80"],["Paneer roll",89,"tandoori paneer","https://images.unsplash.com/photo-1565299507177-b0ac66763828?auto=format&fit=crop&w=300&q=80"],["Egg roll",69,"classic street roll","https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=300&q=80"]]},
+{id:3,name:"Biryani Point",type:"Street food",walk:6,usp:"Late-night half-portion biryani · pickup ₹129",img:"https://images.unsplash.com/photo-1563379091339-03246963d51a?auto=format&fit=crop&w=900&q=80",items:[["Chicken biryani",129,"half portion","https://images.unsplash.com/photo-1563379091339-03246963d51a?auto=format&fit=crop&w=300&q=80"],["Egg biryani",99,"half portion","https://images.unsplash.com/photo-1631515242808-497c3fbd3972?auto=format&fit=crop&w=300&q=80"],["Chicken kebab",149,"4 pcs","https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=300&q=80"]]},
+{id:4,name:"Chaat Gully",type:"Street food",walk:7,usp:"Pani puri + dahi puri combo · pickup ₹99",img:"https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=900&q=80",items:[["Pani puri",59,"6 pcs · spicy water","https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=300&q=80"],["Dahi puri",69,"6 pcs","https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=300&q=80"],["Papdi chaat",59,"classic","https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=300&q=80"]]}
+];
+let current=vendors[0],cart={},eta=10,order=null;
+
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.bottom button').forEach((b,i)=>b.classList.toggle('active',['home','scan','feed','cart'][i]===id));document.getElementById('cartbar').classList.remove('show');window.scrollTo({top:0,behavior:'smooth'})}
+function vendorCard(v,i){return `<article class="vendor-card"><div class="walk">${v.walk} min</div><div><div class="vendor-name"><span style="color:var(--green);font-size:10px">●</span> ${v.name}</div><div class="vendor-sub">${v.items[0][0]} · ${v.items.length+2} menu items</div><div class="vendor-price">₹${v.items[0][1]}</div></div><div class="thumb" style="background-image:url('${v.img}')"></div><div><span class="tag">${i===0?'SAVE ₹21':i===1?'SAVE ₹15':'POPULAR'}</span></div>${i===1?'<div class="activity">🔥 8 people ordered from this lane in the last 30 min</div>':''}<button class="primary" style="grid-column:1/-1;padding:9px;font-size:10px" onclick="openVendor(${v.id})">Quick choices · full menu →</button></article>`}
+function renderLane(list=vendors){document.getElementById('lane').innerHTML=list.map(vendorCard).join('');document.getElementById('scanList').innerHTML=[...vendors].sort((a,b)=>a.walk-b.walk).slice(0,3).map((v,i)=>vendorCard(v,i)).join('')}
+function openVendor(id){current=vendors.find(v=>v.id===id);cart={};document.getElementById('vendorCover').style.backgroundImage=`linear-gradient(0deg,#2b1710d9,#2b171011),url('${current.img}')`;document.getElementById('vName').textContent=current.name;document.getElementById('vType').textContent=`${current.type} · ${current.walk} min walk`;document.getElementById('vUsp').textContent='🔥 '+current.usp;document.getElementById('vWalk').textContent='🚶 '+current.walk+' min';renderVendor();show('vendor')}
+function renderVendor(){document.getElementById('bestItems').innerHTML=current.items.slice(0,2).map(itemHTML).join('');document.getElementById('moreItems').innerHTML=current.items.slice(2).map(itemHTML).join('')||'<div class="muted" style="font-size:10px">More items coming soon.</div>'}
+function itemHTML(i){let idx=current.items.indexOf(i);return `<article class="item"><div><h3>${i[0]}</h3><p>${i[2]}</p><div class="item-price">₹${i[1]}</div><button class="add" onclick="addItem(${idx})">+ Add</button></div><div class="item-img" style="background-image:url('${i[3]}')"></div></article>`}
+function addItem(n){cart[n]=(cart[n]||0)+1;updateCart();toast(current.items[n][0]+' added')}
+function quickPick(type){
+ let itemIndex=type==='under'?current.items.findIndex(i=>i[1]<100):0;
+ if(type==='quick')itemIndex=0;
+ if(type==='share')itemIndex=Math.min(1,current.items.length-1);
+ if(type==='hungry'){cart[0]=(cart[0]||0)+1;if(current.items.length>1)cart[1]=(cart[1]||0)+1}
+ else cart[itemIndex]=(cart[itemIndex]||0)+1;
+ updateCart();toast(type==='hungry'?'Built a filling pickup ticket.':'Added the fastest matching pick. Scroll down to view your ticket.')}
+function updateCart(){let count=Object.values(cart).reduce((a,b)=>a+b,0),value=Object.entries(cart).reduce((s,[i,q])=>s+current.items[i][1]*q,0);document.getElementById('cartCount').textContent=count+' item'+(count===1?'':'s');document.getElementById('cartValue').textContent='₹'+value;document.getElementById('cartbar').classList.toggle('show',count>0);document.getElementById('etaTotal').textContent='₹'+value;document.getElementById('etaSummary').textContent=count+' item'+(count===1?'':'s')+' from '+current.name+' · ₹'+value}
+document.querySelectorAll('.eta-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.eta-btn').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');eta=+b.dataset.eta}))
+function placeOrder(){let total=Object.entries(cart).reduce((s,[i,q])=>s+current.items[i][1]*q,0);if(!total){show('vendor');toast('Add something first.');return}order={vendor:current.name,total,token:Math.floor(1000+Math.random()*9000),eta,status:0,walk:current.walk};show('status');renderStatus();setTimeout(()=>{order.status=1;renderStatus()},3000);setTimeout(()=>{order.status=2;renderStatus()},7000)}
+function renderStatus(){let steps=[['Order placed','Ticket sent to the stall.'],['Cooking countdown','Vendor times the cook to your arrival.'],['Ready for pickup','Show your token. No queue.']];document.getElementById('statusSub').textContent=order.vendor+' · ~'+order.eta+' min away · ₹'+order.total;document.getElementById('statusBox').innerHTML=steps.map((s,i)=>`<div style="display:grid;grid-template-columns:18px 1fr;gap:10px;padding-bottom:22px"><div style="width:12px;height:12px;border-radius:50%;background:${i<=order.status?'var(--red)':'var(--line)'}"></div><div><b style="font-size:13px">${s[0]}</b><div style="font-size:10px;color:var(--muted)">${s[1]}</div></div></div>`).join('')+`<div class="token"><div><small style="font-size:9px;font-weight:1000">SHOW AT COUNTER</small><div><b>${order.token}</b></div></div><div style="font-size:10px;font-weight:900;text-align:right">🚶 ${order.walk} min<br>walking</div></div>`}
+function chip(el,type){document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));el.classList.add('active');let list=type==='under'?vendors.filter(v=>v.items.some(i=>i[1]<100)):type==='spicy'?vendors.filter(v=>v.id===1||v.id===4):type==='trending'?vendors.slice(1):vendors;renderLane(list)}
+const prompts=['100 people nearby looking for something spicy?','300 looking for pani puri?','76 looking for momos under ₹100?','54 looking for a quick bite?'];let p=0;setInterval(()=>{let x=document.getElementById('search');if(document.activeElement!==x&&!x.value)document.getElementById('suggest').textContent=prompts[p++%prompts.length]},2600);
+document.getElementById('search').addEventListener('input',e=>{let q=e.target.value.toLowerCase().trim();if(!q){renderLane();return}let list=vendors.filter(v=>(v.name+' '+v.type+' '+v.items.map(i=>i[0]+' '+i[2]).join(' ')).toLowerCase().includes(q));renderLane(list.length?list:vendors);document.getElementById('suggest').textContent=list.length+' pickup options match “'+q+'”.'})
+function toast(t){let x=document.getElementById('toast');x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),1900)}
+renderLane();
+</script>
+</body>
+</html>
