@@ -16,11 +16,25 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   async onModuleInit() {
-    await this.$connect();
+    try {
+      if (process.env.DATABASE_URL) {
+        await this.$connect();
+        console.log('✅ PostgreSQL connected via Prisma');
+      } else {
+        console.log('⚡ DATABASE_URL not set - running with in-memory fallback');
+      }
+    } catch (e) {
+      console.warn('⚠️ Prisma connection failed, running with in-memory store:', e);
+    }
   }
 
   async onModuleDestroy() {
-    await this.$disconnect();
-    await this.pool.end();
+    try {
+      await this.$disconnect();
+      await this.pool.end();
+    } catch (e) {
+      // ignore
+    }
   }
+
 }
