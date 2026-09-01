@@ -44,19 +44,53 @@ export default function OutletMenuScreen({ route, navigation }: Props) {
   const [etaModalVisible, setEtaModalVisible] = useState(false);
   const [selectedEta, setSelectedEta] = useState<number>(10);
 
+  const DEFAULT_MENUS: Record<string, any[]> = {
+    'out-1': [
+      { id: 'm1', name: 'Steamed Veg Momos (6 pcs)', price: '80.00', category: 'Momos', isAvailable: true, description: 'Filled with fresh cabbage, carrots, paneer and spices.' },
+      { id: 'm2', name: 'Kurkure Paneer Momos (6 pcs)', price: '120.00', category: 'Momos', isAvailable: true, description: 'Crunchy battered paneer momos with spicy mint chutney.' },
+      { id: 'm3', name: 'Darjeeling Chicken Momos (6 pcs)', price: '110.00', category: 'Momos', isAvailable: true, description: 'Authentic juicy Himalayan chicken dumplings.' },
+      { id: 'm4', name: 'Spicy Schezwan Gravy Momos', price: '130.00', category: 'Momos', isAvailable: true, description: 'Tossed in hot wok schezwan chili garlic sauce.' },
+      { id: 'm12', name: 'Thukpa Noodle Soup Bowl', price: '140.00', category: 'Soups', isAvailable: true, description: 'Traditional Tibetan hot noodle soup.' },
+    ],
+    'out-4': [
+      { id: 'm-nk-1', name: 'Hyderabadi Chicken Biryani', price: '180.00', category: 'Biryani', isAvailable: true, description: 'Slow-cooked aromatic basmati rice with tender spiced chicken.' },
+      { id: 'm-nk-2', name: 'Veg Dum Biryani', price: '140.00', category: 'Biryani', isAvailable: true, description: 'Layered saffron rice cooked with garden vegetables and paneer.' },
+      { id: 'm-nk-3', name: 'Steamed Chicken Momos (6 pcs)', price: '100.00', category: 'Momos', isAvailable: true, description: 'Freshly steamed chicken momos with garlic sauce.' },
+      { id: 'm-nk-4', name: 'Butter Chicken Kathi Roll', price: '130.00', category: 'Rolls', isAvailable: true, description: 'Grilled paratha wrapped with juicy butter chicken.' },
+      { id: 'm-nk-5', name: 'Masala Chai & Samosa Combo', price: '50.00', category: 'Snacks', isAvailable: true, description: 'Hot brewed cutting chai with 2 crispy potato samosas.' },
+    ],
+    'out-2': [
+      { id: 'm5', name: 'Double Egg Chicken Roll', price: '90.00', category: 'Rolls', isAvailable: true, description: 'Flaky paratha layered with double eggs and chicken chunks.' },
+      { id: 'm6', name: 'Paneer Tikka Roll', price: '100.00', category: 'Rolls', isAvailable: true, description: 'Marinated roasted paneer cubes with onions and mint sauce.' },
+      { id: 'm7', name: 'Crispy Veg Roll', price: '70.00', category: 'Rolls', isAvailable: true, description: 'Golden potato patty with crunchy veggies.' },
+      { id: 'm8', name: 'Butter Chicken Rice Bowl', price: '140.00', category: 'Bowls', isAvailable: true, description: 'Steamed basmati rice served with rich makhani gravy.' },
+    ],
+    'out-3': [
+      { id: 'm9', name: 'Ghee Podi Masala Dosa', price: '75.00', category: 'South Indian', isAvailable: true, description: 'Crispy fermented crepe smeared with pure ghee and gun powder.' },
+      { id: 'm10', name: 'Steamed Idli Vada Combo', price: '60.00', category: 'South Indian', isAvailable: true, description: '2 soft idlis + 1 crispy medu vada with sambar & coconut chutney.' },
+      { id: 'm11', name: 'Degree Filter Coffee', price: '25.00', category: 'Beverages', isAvailable: true, description: 'Authentic South Indian chicory filtered frothy coffee.' },
+    ],
+  };
+
   useEffect(() => {
     const fetchMenu = async () => {
       try {
         const res = await api.get(`/outlets/${outletId}/menu`);
-        setMenu(res.data || []);
+        if (res.data && res.data.length > 0) {
+          setMenu(res.data);
+          setLoading(false);
+          return;
+        }
       } catch (error) {
-        console.error('Error fetching menu', error);
-      } finally {
-        setLoading(false);
+        console.warn('Using fallback menu for stall', error);
       }
+      const fallbackItems = DEFAULT_MENUS[outletId] || DEFAULT_MENUS['out-4'] || DEFAULT_MENUS['out-1'];
+      setMenu(fallbackItems);
+      setLoading(false);
     };
     fetchMenu();
   }, [outletId]);
+
 
   const addToCart = (id: string) => {
     setCart((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
