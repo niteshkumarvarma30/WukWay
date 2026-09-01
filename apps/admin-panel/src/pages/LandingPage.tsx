@@ -33,15 +33,25 @@ export default function LandingPage() {
   // Interactive ROI Calculator for Vendors
   const [dailyRushOrders, setDailyRushOrders] = useState(120);
   const avgDishPrice = 120;
-  const extraRevenue = Math.round(dailyRushOrders * 0.35 * avgDishPrice * 26); // 35% speedup * 26 days
+  const extraRevenue = Math.round(dailyRushOrders * 0.35 * avgDishPrice * 26);
+
+  const getAppBaseUrl = () => {
+    if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+      return 'https://wukway-app.vercel.app';
+    }
+    return import.meta.env.VITE_APP_URL || 'http://localhost:8081';
+  };
+
 
   const handleLaunchRole = (role: 'admin' | 'customer' | 'vendor') => {
     if (role === 'admin') {
       openSignIn({ forceRedirectUrl: '/admin' });
     } else {
-      window.location.href = `http://localhost:8081/${role}`;
+      const baseUrl = getAppBaseUrl();
+      window.location.href = `${baseUrl}/${role}`;
     }
   };
+
 
   return (
     <div className="landing-wrapper">
@@ -478,10 +488,11 @@ export default function LandingPage() {
 
           <div className="footer-links-group">
             <h5>Portals</h5>
-            <a href="http://localhost:8081/customer">Customer App (Port 8081)</a>
-            <a href="http://localhost:8081/vendor">Vendor Kitchen Display</a>
+            <a href="https://wukway-app.vercel.app/customer">Customer App</a>
+            <a href="https://wukway-app.vercel.app/vendor">Vendor Kitchen Display</a>
             <a href="/admin">Admin Operations</a>
           </div>
+
 
           <div className="footer-links-group">
             <h5>Product</h5>

@@ -348,9 +348,13 @@ export default function VendorHomeScreen() {
             style={styles.adminShortcutBtn}
             onPress={() => {
               if (Platform.OS === 'web' && typeof window !== 'undefined') {
-                window.open('http://localhost:5173/admin', '_blank');
+                const adminUrl = window.location.hostname.includes('vercel.app')
+                  ? 'https://wuk-way.vercel.app/admin'
+                  : 'http://localhost:5173/admin';
+                window.open(adminUrl, '_blank');
               }
             }}
+
           >
             <Text style={styles.adminShortcutText}>💻 Open Admin Operations Hub to Approve ➔</Text>
           </TouchableOpacity>

@@ -13,12 +13,16 @@ export default function RoleSelectionScreen({ onSelectRole }: RoleSelectionScree
   const handleSelect = async (role: 'CUSTOMER' | 'VENDOR' | 'ADMIN') => {
     if (role === 'ADMIN') {
       if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        window.location.href = 'http://localhost:5173/admin';
+        const adminUrl = window.location.hostname.includes('vercel.app')
+          ? 'https://wuk-way.vercel.app/admin'
+          : 'http://localhost:5173/admin';
+        window.location.href = adminUrl;
       } else {
-        alert('Admin portal is available on Web at http://localhost:5173/admin');
+        alert('Admin portal is available at https://wuk-way.vercel.app/admin');
       }
       return;
     }
+
 
     await AsyncStorage.setItem('appRole', role);
     onSelectRole(role);
