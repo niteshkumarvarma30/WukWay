@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: wukway-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: CLERK_SECRET_KEY
+        value: sk_test_y79n85jo7rKQTCrvGxmYUzxrUB7wrOwC2XBbrbxq46
